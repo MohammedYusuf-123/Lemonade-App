@@ -3,6 +3,7 @@ package com.example.lemonade
 import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
+import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
@@ -41,45 +42,92 @@ class MainActivity : ComponentActivity() {
 
 @Composable
 fun LemonadeInteractive() {
-    var imageCounter by remember { mutableStateOf(1) }
-    var imageSource = when (imageCounter) {
-        1 -> R.drawable.lemon_tree
-        2 -> R.drawable.lemon_squeeze
-        3 -> R.drawable.lemon_drink
-        4 -> R.drawable.lemon_restart
-        else -> R.drawable.lemon_tree
+    var currentStep by remember { mutableStateOf(1) }
+    var squeezeCount by remember { mutableStateOf(0) }
+    when (currentStep) {
+        1 -> {
+            LemonTextAndImage(
+                textLabelResourceId = R.string.screen1_text,
+                drawableResourceId = R.drawable.lemon_tree,
+                contentDescriptionResourceId = R.string.content_description1,
+                onImageClick = {
+                    currentStep = 2
+                    squeezeCount = (2..4).random()
+                }
+            )
+        }
+        2 -> {
+            LemonTextAndImage(
+                textLabelResourceId = R.string.screen2_text,
+                drawableResourceId = R.drawable.lemon_squeeze,
+                contentDescriptionResourceId = R.string.content_description2,
+                onImageClick = {
+                    squeezeCount--
+                    if (squeezeCount == 0) {
+                        currentStep = 3
+                    }
+                }
+            )
+        }
+        3 -> {
+            LemonTextAndImage(
+                textLabelResourceId = R.string.screen3_text,
+                drawableResourceId = R.drawable.lemon_drink,
+                contentDescriptionResourceId = R.string.content_description3,
+                onImageClick = {
+                    currentStep = 4
+                }
+            )
+        }
+        4 -> {
+            LemonTextAndImage(
+                textLabelResourceId = R.string.screen4_text,
+                drawableResourceId = R.drawable.lemon_restart,
+                contentDescriptionResourceId = R.string.content_description4,
+                onImageClick = {
+                    currentStep = 1
+                }
+            )
+        }
     }
-    var textSource = when (imageCounter) {
-        1 -> R.string.screen1_text
-        2 -> R.string.screen2_text
-        3 -> R.string.screen3_text
-        4 -> R.string.screen4_text
-        else -> R.string.screen1_text
-    }
+}
+
+@Composable
+fun LemonTextAndImage(
+    textLabelResourceId: Int,
+    drawableResourceId: Int,
+    contentDescriptionResourceId: Int,
+    onImageClick: () -> Unit,
+    modifier: Modifier = Modifier
+) {
     Column(
         horizontalAlignment = Alignment.CenterHorizontally,
         verticalArrangement = Arrangement.Center,
-        modifier = Modifier
-            .fillMaxSize()
-            .wrapContentSize(Alignment.Center)
+        modifier = modifier.fillMaxSize()
     ) {
-        Text(text = stringResource(textSource), fontSize = 18.sp)
+        Text(
+            text = stringResource(textLabelResourceId),
+            fontSize = 18.sp
+        )
         Spacer(modifier = Modifier.height(16.dp))
         Image(
-            painter = painterResource(imageSource),
-            contentDescription = null,
+            painter = painterResource(drawableResourceId),
+            contentDescription = stringResource(contentDescriptionResourceId),
             modifier = Modifier
-                .border(
-                    3.dp,
-                    color = Color(105, 205, 216),
-                    shape = RoundedCornerShape(2.dp)
+                .wrapContentSize()
+                .clickable(
+                    onClick = onImageClick
                 )
-                .clickable { imageCounter++ }
+                .border(
+                    BorderStroke(2.dp, Color(105, 205, 216)),
+                    shape = RoundedCornerShape(4.dp)
+                )
+                .padding(16.dp)
         )
     }
 }
 
-@Preview(showBackground = true)
+@Preview(showBackground = true, showSystemUi = true)
 @Composable
 fun LemonadePreview() {
     LemonadeTheme {
